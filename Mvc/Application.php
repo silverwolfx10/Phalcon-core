@@ -6,7 +6,6 @@ namespace Core\Mvc;
 use Phalcon\Mvc\Application as MvcApplication,
     Phalcon\Events\Manager as EventsManager,
     Phalcon\Mvc\Dispatcher,
-    //Phalcon\Dispatcher as Dispatcher;
     Phalcon\Mvc\View,
     //
     Phalcon\DI\FactoryDefault as DiFactory,
@@ -37,6 +36,7 @@ class Application extends MvcApplication
 
         // bootstrap:beforeMergeConfig
         'Core\Bootstrap\RegisterViewStrategyListener',
+
         //Database
         'Core\Bootstrap\RegisterDatabaseListener',
 
@@ -101,6 +101,7 @@ class Application extends MvcApplication
         $dispatcher->setEventsManager($eventsManager);
         $di->setShared('dispatcher', $dispatcher);
 
+
         $di->set(
             'volt',
             function($view, $di) use($config)
@@ -110,17 +111,18 @@ class Application extends MvcApplication
                     array(
                         'compiledPath'      => __DIR__.'/../../../data/volt/',
                         'compiledExtension' => '.compiled',
-                        'compiledSeparator' => '-',
+                        'compiledSeparator' => 'V',
                         'stat'              => (bool) 1,
                     )
                 );
                 return $volt;
             }
         );
+
         $view = new View();
-        $view->registerEngines(array(
+        $view->registerEngines([
           ".phtml" => "volt"
-        ));
+        ]);
 
         $di->setShared('view', $view);
 
@@ -139,21 +141,23 @@ class Application extends MvcApplication
                             case Dispatcher::EXCEPTION_HANDLER_NOT_FOUND:
                             case Dispatcher::EXCEPTION_ACTION_NOT_FOUND:
                                 $dispatcher->forward(
-                                    array(
-                            'module' => 'Application',
-                            'namespace' => 'Application\Controller',
-                            'controller' => 'index',
-                            'action' => 'notFound',
-                                    )
+                                    [
+                                        'module' => 'Application',
+                                        'namespace' => 'Application\Controller',
+                                        'controller' => 'index',
+                                        'action' => 'notFound',
+                                    ]
                                 );
                                 return false;
                                 break; // for checkstyle
                             default:
                                 $dispatcher->forward(
-                                    array(
-                                        'controller' => 'error',
+                                    [
+                                        'module' => 'Application',
+                                        'namespace' => 'Application\Controller',
+                                        'controller' => 'index',
                                         'action' => 'uncaughtException',
-                                    )
+                                    ]
                                 );
                                 return false;
                                 break; // for checkstyle
@@ -210,6 +214,7 @@ class Application extends MvcApplication
             if (Application::isDebugMode()) {
                 (new Debug())->onUncaughtException($e);
             }
+
             return new Response();
         }
     }
