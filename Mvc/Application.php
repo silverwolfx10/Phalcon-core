@@ -115,6 +115,22 @@ class Application extends MvcApplication
                         'stat'              => (bool) 1,
                     )
                 );
+                
+                //filtros de view customizados
+                //1000 number_format($number, 2, '.', '')
+                $volt->getCompiler()->addFilter('number_format', function ($resolvedArgs) {
+                    return 'number_format(' . $resolvedArgs . ')';
+                });
+
+                //1000 | number_format = 1.000,00 , 1000 | number_format(0) = 1.000
+                $volt->getCompiler()->addFilter('number_format_br', function ($resolvedArgs) {
+                    $args = explode(",", $resolvedArgs);
+                    $decimal = isset($args[1])? $args[1] : 2;
+
+                    return 'number_format(' . $args[0] . ', ' . $decimal . ' , \',\' , \'.\'  )';
+                });
+                
+                
                 return $volt;
             }
         );
