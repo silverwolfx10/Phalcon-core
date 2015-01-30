@@ -8,7 +8,7 @@ class RegisterDatabaseListener
     {
         $di = $application->getDI();
         $config = $di->get('config');
-        if(isset($config['databases']) && is_array($config['databases'])){
+        if(isset($config['databases']) && $config['databases']){
             foreach ($config['databases'] as $k => $database) {
     
                 $db_name = 'db_'.$k;
