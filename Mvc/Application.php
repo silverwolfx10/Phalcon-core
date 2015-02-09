@@ -14,8 +14,6 @@ use Phalcon\Mvc\Application as MvcApplication,
     //
     Phalcon\Debug,
     //
-    Phalcon\Mvc\View\Engine\Volt as PhVolt,
-    //
     Exception;
 
 class Application extends MvcApplication
@@ -48,6 +46,7 @@ class Application extends MvcApplication
         // bootstrap:afterMergeConfig
         'Core\Bootstrap\RegisterDIListener',
         'Core\Bootstrap\RegisterRoutesListener',
+        'Core\Bootstrap\RegisterViewHelpersListener',
 
         // bootstrap:bootstrapModules
         'Core\Bootstrap\BootstrapModulesListener',
@@ -101,51 +100,17 @@ class Application extends MvcApplication
         $dispatcher->setEventsManager($eventsManager);
         $di->setShared('dispatcher', $dispatcher);
 
-
-        $di->set(
-            'volt',
-            function($view, $di) use($config)
-            {
-                $volt = new PhVolt($view, $di);
-                $volt->setOptions(
-                    array(
-                        'compiledPath'      => __DIR__.'/../../../data/volt/',
-                        'compiledExtension' => '.compiled',
-                        'compiledSeparator' => 'V',
-                        'stat'              => (bool) 1,
-                    )
-                );
-                
-                //filtros de view customizados
-                //1000 number_format($number, 2, '.', '')
-                $volt->getCompiler()->addFilter('number_format', function ($resolvedArgs) {
-                    return 'number_format(' . $resolvedArgs . ')';
-                });
-
-                //1000 | number_format = 1.000,00 , 1000 | number_format(0) = 1.000
-                $volt->getCompiler()->addFilter('number_format_br', function ($resolvedArgs) {
-                    $args = explode(",", $resolvedArgs);
-                    $decimal = isset($args[1])? $args[1] : 2;
-
-                    return 'number_format(' . $args[0] . ', ' . $decimal . ' , \',\' , \'.\'  )';
-                });
-                
-                
-                return $volt;
-            }
-        );
-
         $view = new View();
-        $view->registerEngines([
-          ".phtml" => "volt"
-        ]);
+
+        //verifica se vai utilizar volt
+        if(isset($config['volt']) && $config['volt']){
+            $view->registerEngines([
+              ".phtml" => "volt"
+            ]);
+        }
 
         $di->setShared('view', $view);
-
-
-
-
-
+        
         $di->set(
             'dispatcher',
             function() use ($di) {
@@ -186,11 +151,6 @@ class Application extends MvcApplication
             },
             true
         );
-
-
-
-
-
 
         return $application->bootstrap();
     }
