@@ -55,5 +55,9 @@ class DefaultViewStrategy
         if (isset($options['default_layout'])) {
             $this->view->setLayout($options['default_layout']);
         }
+        
+        if(isset($this->config['view_strategy']['default_partials'])){
+            $this->view->setPartialsDir($this->config['view_strategy']['default_partials']);
+        }
     }
 }
